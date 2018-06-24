@@ -1,2 +1,2 @@
-# xyz-db
-Collection of xyz structures for testing new methods 
+# xyz-wfn-db
+Collection of xyz structures and wfn files
