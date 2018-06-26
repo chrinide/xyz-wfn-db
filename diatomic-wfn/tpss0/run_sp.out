@@ -1,0 +1,28 @@
+/home/jluis/pkgs/h5py/2.7.1/lib/python2.7/site-packages/h5py-2.7.1-py2.7-linux-x86_64.egg/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.
+  from ._conv import register_converters as _register_converters
+/home/jluis/src/pyscf/pyscf/dft/libxc.py:1063: UserWarning: Libxc functionals ['XC_MGGA_X_TPSS'] have large discrepancy to xcfun library.
+
+  'library.\n' % problem_xc)
+
+libxc library does not support derivative order 2 for  tpss0
+tpss0 not found in xcfun library
+
+output file: f2.out
+Traceback (most recent call last):
+  File "run_sp.py", line 62, in <module>
+    mf.kernel()
+  File "/home/jluis/src/pyscf/pyscf/soscf/newton_ah.py", line 874, in kernel
+    callback=self.callback, verbose=self.verbose)
+  File "/home/jluis/src/pyscf/pyscf/soscf/newton_ah.py", line 685, in kernel
+    u, g_orb, kfcount, jkcount = next(rotaiter)
+  File "/home/jluis/src/pyscf/pyscf/soscf/newton_ah.py", line 505, in rotate_orb_cc
+    g_orb, h_op, h_diag = mf.gen_g_hop(mo_coeff, mo_occ, fock_ao)
+  File "/home/jluis/src/pyscf/pyscf/soscf/newton_ah.py", line 955, in gen_g_hop
+    return gen_g_hop_rhf(self, mo_coeff, mo_occ, fock_ao, h1e)
+  File "/home/jluis/src/pyscf/pyscf/soscf/newton_ah.py", line 89, in gen_g_hop_rhf
+    vind = _gen_rhf_response(mf, mo_coeff, mo_occ, singlet=None, hermi=1)
+  File "/home/jluis/src/pyscf/pyscf/soscf/newton_ah.py", line 291, in _gen_rhf_response
+    ni.libxc.test_deriv_order(mf.xc, 2, raise_error=True)
+  File "/home/jluis/src/pyscf/pyscf/dft/libxc.py", line 606, in test_deriv_order
+    raise e
+KeyError: 'Unknown XC key TPSS0'
