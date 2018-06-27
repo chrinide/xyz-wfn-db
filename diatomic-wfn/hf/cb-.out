@@ -1,4 +1,4 @@
-#INFO: **** input file is /home/jluis/src/git/xyz-db/diatomic-wfn/hf/run_sp.py ****
+#INFO: **** input file is /home/jluis/src/git/db/diatomic-wfn/hf/run_sp.py ****
 #!/usr/bin/env python
 
 import numpy, sys, os
@@ -46,7 +46,7 @@ for filename in files:
     name = filename[:-8]
     mol = gto.Mole()
     (mol.atom, charge, spin) = read_molecule(directory+filename)
-    mol.basis = 'def2-qzvpd'
+    mol.basis = 'aug-cc-pvtz'
     mol.charge = charge
     mol.spin = spin
     mol.output = name+'.out'
@@ -72,7 +72,62 @@ for filename in files:
             n_alpha = numpy.count_nonzero(mf.mo_occ)
             P_alpha = 2.0*numpy.dot(new_mo_coeff[:, :n_alpha], new_mo_coeff.T[:n_alpha])
             mf.kernel(dm0=(P_alpha))
-            lib.logger.info(mf,"* Updated SCF energy and orbitals: %16.f" % mf.e_tot)
+            lib.logger.info(mf,"* Updated SCF energy and orbitals: %.6f" % mf.e_tot)
+
+    dm = mf.make_rdm1()
+    nao = mol.nao_nr()
+    unit = 2.541746
+    origin = ([0.0,0.0,0.0])
+    charges = mol.atom_charges()
+    coords  = mol.atom_coords()
+    mol.set_common_orig(origin)
+    r2 = mol.intor_symmetric('int1e_r2')
+    r2 = numpy.einsum('ij,ji->', r2, dm)
+    lib.logger.info(mf,'Electronic spatial extent <R**2> (au): %.4f', r2)
+
+    lib.logger.info(mf,'* Multipoles in the independent field-basis, Gauge -> (0,0,0)')
+    ao_dip = mol.intor_symmetric('int1e_r', comp=3)
+    el_dip = numpy.einsum('xij,ji->x', ao_dip, dm)
+    lib.logger.info(mf,'Electronic Dipole moment(X, Y, Z, Debye): %.4f, %.4f, %.4f', *el_dip*unit)
+    nucl_dip = numpy.einsum('i,ix->x', charges, coords)
+    lib.logger.info(mf,'Nuclear Dipole moment(X, Y, Z, Debye): %.4f, %.4f, %.4f', *nucl_dip*unit)
+    mol_dip = (nucl_dip - el_dip) * unit
+    lib.logger.info(mf,'Total Dipole moment(X, Y, Z, Debye): %.4f, %.4f, %.4f', *mol_dip)
+
+    lib.logger.info(mf,'Quadrupole moments (Debye-Angs)')
+    rr = mol.intor_symmetric('int1e_rr', comp=9).reshape(3,3,nao,nao)
+    rr = -1.0*numpy.einsum('xyij,ji->xy', rr, dm)
+    rr += numpy.einsum('z,zx,zy->xy', charges, coords, coords)
+    rr = rr*unit*lib.param.BOHR
+    lib.logger.info(mf,'Total Quadrupole moments (XX, YY, ZZ): %.4f, %.4f, %.4f', \
+    rr[0,0], rr[1,1], rr[2,2])
+    lib.logger.info(mf,'Total Quadrupole moments (XY, XZ, YZ): %.4f, %.4f, %.4f', \
+    rr[0,1], rr[0,2], rr[1,2])
+ 
+    lib.logger.info(mf,'Octupole moments (Debye-Angs**2)')
+    rrr = mol.intor_symmetric('int1e_rrr', comp=27).reshape(3,3,3,nao,nao)
+    rrr = -1.0*numpy.einsum('xyzij,ji->xyz', rrr, dm)
+    rrr += numpy.einsum('z,zx,zy,zk->xyk', charges, coords, coords, coords)
+    rrr = rrr*unit*lib.param.BOHR**2
+    lib.logger.info(mf,'Total Octupole moments (XXX, YYY, ZZZ, XYY): %.4f, %.4f, %.4f, %.4f', \
+    rrr[0,0,0], rrr[1,1,1], rrr[2,2,2], rrr[0,1,1])
+    lib.logger.info(mf,'Total Octupole moments (XXY, XXZ, XZZ, YZZ): %.4f, %.4f, %.4f, %.4f', \
+    rrr[0,0,1], rrr[0,0,2], rrr[0,2,2], rrr[1,2,2])
+    lib.logger.info(mf,'Total Octupole moments (YYZ, XYZ): %.4f, %.4f', rrr[1,1,2], rrr[0,1,2])
+
+    lib.logger.info(mf,'Hexadecapole moments (Debye-Angs**3)')
+    rrrr = mol.intor_symmetric('int1e_rrrr', comp=81).reshape(3,3,3,3,nao,nao)
+    rrrr = -1.0*numpy.einsum('xyzwij,ji->xyzw', rrrr, dm)
+    rrrr += numpy.einsum('z,zx,zy,zk,zw->xykw', charges, coords, coords, coords, coords)
+    rrrr = rrrr*unit*lib.param.BOHR**3
+    lib.logger.info(mf,'Total Hexadecapole moments (XXXX, YYYY, ZZZZ, XXXY): %.4f, %.4f, %.4f, %.4f', \
+    rrrr[0,0,0,0], rrrr[1,1,1,1], rrrr[2,2,2,2], rrrr[0,0,0,1])
+    lib.logger.info(mf,'Total Hexadecapole moments (XXXZ, YYYX, YYYZ, ZZZX): %.4f, %.4f, %.4f, %.4f', \
+    rrrr[0,0,0,2], rrrr[1,1,1,0], rrrr[1,1,1,2], rrrr[2,2,2,0])
+    lib.logger.info(mf,'Total Hexadecapole moments (ZZZY, XXYY, XXZZ, YYZZ): %.4f, %.4f, %.4f, %.4f', \
+    rrrr[2,2,2,1], rrrr[0,0,1,1], rrrr[0,0,2,2], rrrr[1,1,2,2])
+    lib.logger.info(mf,'Total Hexadecapole moments (XXYZ, YYXZ, ZZXY): %.4f, %.4f, %.4f', \
+    rrrr[0,0,1,2], rrrr[1,1,0,2], rrrr[2,2,0,1])
      
     coeff = mf.mo_coeff[:,mf.mo_occ>0]
     occ = mf.mo_occ[mf.mo_occ>0]
@@ -105,7 +160,7 @@ for filename in files:
     for ia in range(mol.natm):
         symb = mol.atom_pure_symbol(ia)
         inuc = lib.parameters.NUC[symb]
-        betarad = radii.COVALENT[inuc]/2.5
+        betarad = radii.COVALENT[inuc]/3.5
         fspt.write('  betaradw %d %1.3f\n' % ((ia+1),betarad))
     fspt.write('  radialquadbeta 7\n')
     fspt.write('  rmappingbeta 3\n')
@@ -125,7 +180,7 @@ System: ('Linux', 'silicio', '3.16.0-4-amd64', '#1 SMP Debian 3.16.51-3 (2017-12
 Python 2.7.14 (default, Apr  9 2018, 16:34:43) 
 [GCC 7.3.0]
 numpy 1.14.2  scipy 1.0.1
-Date: Sun Jun 24 19:48:05 2018
+Date: Wed Jun 27 19:36:34 2018
 PySCF version 1.5
 PySCF path  /home/jluis/src/pyscf/pyscf
 GIT ORIG_HEAD f2dbb26d09ae5148fbf5975669a994500ac7a4c9
@@ -145,13 +200,13 @@ GIT master branch  f2dbb26d09ae5148fbf5975669a994500ac7a4c9
 [INPUT]  2 B      0.000000000000   0.000000000000   0.093376000000 AA    0.000000000000   0.000000000000   0.176455066607 Bohr
 
 nuclear repulsion = 11.5276762756073
-number of shells = 38
-number of NR pGTOs = 166
-number of NR cGTOs = 126
-basis = def2-qzvpd
+number of shells = 26
+number of NR pGTOs = 116
+number of NR cGTOs = 92
+basis = aug-cc-pvtz
 ecp = {}
-CPU time:      1211.59
-  HOMO = -0.207413743659994  LUMO = -0.133410880793958
+CPU time:       488.66
+  HOMO = -0.207177114747915  LUMO = -0.133093753614682
 
 
 
@@ -169,8 +224,8 @@ SCF gradient tol = None
 max. SCF cycles = 120
 direct_scf = True
 direct_scf_tol = 1e-13
-chkfile to save SCF result = /scratch-ssd/jluis/tmpjT0kOm
-max_memory 64000 MB (current use 390 MB)
+chkfile to save SCF result = /scratch-ssd/jluis/tmpjoCgmp
+max_memory 64000 MB (current use 196 MB)
 ******** <class 'pyscf.scf.hf.RHF'> Newton solver flags ********
 SCF tol = 1e-09
 conv_tol_grad = None
@@ -190,20 +245,20 @@ ah_grad_trust_region = 2.5
 kf_interval = 4
 kf_trust_region = 5
 canonicalization = True
-max_memory 64000 MB (current use 390 MB)
+max_memory 64000 MB (current use 196 MB)
 Set conv_tol_grad to 3.16228e-05
-Initial guess |g|= 0.494259
-  HOMO = -0.0109659461633152  LUMO = 0.150395134737541
-macro= 0  E= -62.266373192535  delta_E= -62.2664  |g|= 0.111712  3 KF 9 JK
-macro= 1  E= -62.2702287884828  delta_E= -0.0038556  |g|= 0.00124262  3 KF 13 JK
-macro= 2  E= -62.2702288303343  delta_E= -4.18515e-08  |g|= 1.92626e-05  2 KF 7 JK
-macro= 3  E= -62.2702288303341  delta_E= 1.42109e-13  |g|= 4.54043e-06  1 KF 2 JK
+Initial guess |g|= 0.490345
+  HOMO = -0.0116486962019867  LUMO = 0.138633612552139
+macro= 0  E= -62.2582691444449  delta_E= -62.2583  |g|= 0.0819858  3 KF 10 JK
+macro= 1  E= -62.2664777885986  delta_E= -0.00820864  |g|= 0.0607463  2 KF 6 JK
+macro= 2  E= -62.2671009919633  delta_E= -0.000623203  |g|= 0.000384922  3 KF 12 JK
+macro= 3  E= -62.2671009919645  delta_E= -1.19371e-12  |g|= 8.02799e-06  1 KF 2 JK
 Canonicalize SCF orbitals
-macro X = 4  E=-62.2702288303341  |g|= 4.54043e-06  total 9 KF 31 JK
-converged SCF energy = -62.2702288303341
+macro X = 4  E=-62.2671009919645  |g|= 8.02799e-06  total 9 KF 30 JK
+converged SCF energy = -62.2671009919645
 RHF/RKS wavefunction has an internal instablity
 * The molecule is unstable
-  HOMO = -0.086460078145303  LUMO = 0.16362668514134
+  HOMO = -0.0872627845876836  LUMO = 0.147179145884552
 
 
 
@@ -221,8 +276,8 @@ SCF gradient tol = None
 max. SCF cycles = 120
 direct_scf = True
 direct_scf_tol = 1e-13
-chkfile to save SCF result = /scratch-ssd/jluis/tmpjT0kOm
-max_memory 64000 MB (current use 646 MB)
+chkfile to save SCF result = /scratch-ssd/jluis/tmpjoCgmp
+max_memory 64000 MB (current use 269 MB)
 ******** <class 'pyscf.scf.hf.RHF'> Newton solver flags ********
 SCF tol = 1e-09
 conv_tol_grad = None
@@ -242,18 +297,34 @@ ah_grad_trust_region = 2.5
 kf_interval = 4
 kf_trust_region = 5
 canonicalization = True
-max_memory 64000 MB (current use 646 MB)
+max_memory 64000 MB (current use 269 MB)
 Set conv_tol_grad to 3.16228e-05
-Initial guess |g|= 0.0783845
-  HOMO = -0.0974721361758233  LUMO = 0.165749807897787
-macro= 0  E= -62.3067184694926  delta_E= -0.0364896  |g|= 0.0186541  3 KF 11 JK
-macro= 1  E= -62.3074908876921  delta_E= -0.000772418  |g|= 0.0238896  2 KF 7 JK
-macro= 2  E= -62.3075600084285  delta_E= -6.91207e-05  |g|= 0.000993665  3 KF 12 JK
-macro= 3  E= -62.3075600252931  delta_E= -1.68646e-08  |g|= 0.000113633  1 KF 8 JK
-macro= 4  E= -62.307560025293  delta_E= 1.27898e-13  |g|= 1.42153e-05  1 KF 2 JK
+Initial guess |g|= 0.0775511
+  HOMO = -0.097887354585582  LUMO = 0.147973681390497
+macro= 0  E= -62.3034741566134  delta_E= -0.0363732  |g|= 0.0200029  3 KF 11 JK
+macro= 1  E= -62.3041343020943  delta_E= -0.000660145  |g|= 0.00639385  3 KF 13 JK
+macro= 2  E= -62.3041407329819  delta_E= -6.43089e-06  |g|= 0.000308161  2 KF 12 JK
+macro= 3  E= -62.3041407329819  delta_E= -2.84217e-14  |g|= 7.99219e-06  1 KF 2 JK
 Canonicalize SCF orbitals
-macro X = 5  E=-62.307560025293  |g|= 1.42153e-05  total 10 KF 40 JK
-converged SCF energy = -62.307560025293
-* Updated SCF energy and orbitals:              -62
+macro X = 4  E=-62.3041407329819  |g|= 7.99219e-06  total 9 KF 38 JK
+converged SCF energy = -62.3041407329819
+* Updated SCF energy and orbitals: -62.304141
 RHF/RKS wavefunction is stable in the intenral stablity analysis
 * The molecule is stable
+Electronic spatial extent <R**2> (au): 95.9768
+* Multipoles in the independent field-basis, Gauge -> (0,0,0)
+Electronic Dipole moment(X, Y, Z, Debye): 0.0001, 0.0001, 46.9218
+Nuclear Dipole moment(X, Y, Z, Debye): 0.0000, 0.0000, 44.6219
+Total Dipole moment(X, Y, Z, Debye): -0.0001, -0.0001, -2.2999
+Quadrupole moments (Debye-Angs)
+Total Quadrupole moments (XX, YY, ZZ): -18.0302, -18.0874, -30.4451
+Total Quadrupole moments (XY, XZ, YZ): 2.9069, -0.0001, -0.0001
+Octupole moments (Debye-Angs**2)
+Total Octupole moments (XXX, YYY, ZZZ, XYY): -0.0003, -0.0003, -54.9368, -0.0001
+Total Octupole moments (XXY, XXZ, XZZ, YZZ): -0.0001, -10.6916, -0.0003, -0.0003
+Total Octupole moments (YYZ, XYZ): -10.7505, 2.9933
+Hexadecapole moments (Debye-Angs**3)
+Total Hexadecapole moments (XXXX, YYYY, ZZZZ, XXXY): -45.7816, -45.9829, -221.1349, 5.1132
+Total Hexadecapole moments (XXXZ, YYYX, YYYZ, ZZZX): -0.0002, 5.1109, -0.0002, -0.0006
+Total Hexadecapole moments (ZZZY, XXYY, XXZZ, YYZZ): -0.0006, -15.2186, -36.8433, -36.9445
+Total Hexadecapole moments (XXYZ, YYXZ, ZZXY): -0.0001, -0.0001, 5.1424

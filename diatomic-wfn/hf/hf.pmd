@@ -8,8 +8,8 @@ tes
   nr 551
   lebedev 5810
   betasphere
-  betaradw 1 0.234
-  betaradw 2 0.431
+  betaradw 1 0.167
+  betaradw 2 0.308
   radialquadbeta 7
   rmappingbeta 3
   lmaxbeta 8

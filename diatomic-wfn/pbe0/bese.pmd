@@ -1,7 +1,6 @@
 bese.wfn
 nosymmetry
 tes
-  xcdft 0 0 406
   epsiscp 0.220
   radialquad 7
   rmapping 2
@@ -9,8 +8,8 @@ tes
   nr 551
   lebedev 5810
   betasphere
-  betaradw 1 0.907
-  betaradw 2 1.134
+  betaradw 1 0.518
+  betaradw 2 0.648
   radialquadbeta 7
   rmappingbeta 3
   lmaxbeta 8
