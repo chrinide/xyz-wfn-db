@@ -239,3 +239,42 @@ Set gradient conv threshold to 3.16228e-05
 tot grids = 325980
 init E= -273.37672889666
   HOMO = -0.308972023673838  LUMO = -0.114757349583512
+cycle= 1 E= -271.348305565595  delta_E= 2.03  |g|= 0.664  |ddm|= 6.29
+  HOMO = -0.184972628039162  LUMO = 0.000837021220120236
+cycle= 2 E= -271.34564207087  delta_E= 0.00266  |g|= 0.667  |ddm|= 1.91
+  HOMO = -0.278534612288952  LUMO = -0.00366857824744095
+cycle= 3 E= -271.45422114931  delta_E= -0.109  |g|= 0.0459  |ddm|= 0.77
+  HOMO = -0.284852313171158  LUMO = -0.00376738985967978
+cycle= 4 E= -271.454603993233  delta_E= -0.000383  |g|= 0.0259  |ddm|= 0.167
+  HOMO = -0.282181197606643  LUMO = -0.00370470166781338
+cycle= 5 E= -271.454750921202  delta_E= -0.000147  |g|= 0.00701  |ddm|= 0.0474
+  HOMO = -0.282205669548645  LUMO = -0.00364452236314893
+cycle= 6 E= -271.454762415226  delta_E= -1.15e-05  |g|= 0.00078  |ddm|= 0.0169
+  HOMO = -0.282149646990897  LUMO = -0.00363834588794005
+cycle= 7 E= -271.454762618011  delta_E= -2.03e-07  |g|= 0.000279  |ddm|= 0.00629
+  HOMO = -0.282164145458145  LUMO = -0.00363657901211864
+cycle= 8 E= -271.454762640419  delta_E= -2.24e-08  |g|= 9.01e-05  |ddm|= 0.000968
+  HOMO = -0.282160176291787  LUMO = -0.00363654870228284
+cycle= 9 E= -271.45476264269  delta_E= -2.27e-09  |g|= 3.15e-05  |ddm|= 0.00024
+  HOMO = -0.282162252730172  LUMO = -0.00363672476593747
+cycle= 10 E= -271.45476264296  delta_E= -2.7e-10  |g|= 3.1e-06  |ddm|= 9.82e-05
+  HOMO = -0.282163079334982  LUMO = -0.00363685338296243
+Extra cycle  E= -271.454762642965  delta_E= -4.09e-12  |g|= 2.14e-06  |ddm|= 2.69e-05
+converged SCF energy = -271.454762642965
+Electronic spatial extent <R**2> (au): 544.9340
+* Multipoles in the independent field-basis, Gauge -> (0,0,0)
+Electronic Dipole moment(X, Y, Z, Debye): -0.0000, -0.0000, -0.1017
+Nuclear Dipole moment(X, Y, Z, Debye): 0.0000, 0.0000, -0.0208
+Total Dipole moment(X, Y, Z, Debye): 0.0000, 0.0000, 0.0809
+Quadrupole moments (Debye-Angs)
+Total Quadrupole moments (XX, YY, ZZ): -43.0938, -39.0919, -43.3626
+Total Quadrupole moments (XY, XZ, YZ): 0.0000, -0.0000, -0.0000
+Octupole moments (Debye-Angs**2)
+Total Octupole moments (XXX, YYY, ZZZ, XYY): -0.0000, -0.0000, 4.2479, -0.0000
+Total Octupole moments (XXY, XXZ, XZZ, YZZ): -0.0000, -5.8212, 0.0000, 0.0000
+Total Octupole moments (YYZ, XYZ): -1.8555, 0.0000
+Hexadecapole moments (Debye-Angs**3)
+Total Hexadecapole moments (XXXX, YYYY, ZZZZ, XXXY): -325.9389, -239.1126, -211.0677, 0.0000
+Total Hexadecapole moments (XXXZ, YYYX, YYYZ, ZZZX): -0.0000, 0.0000, -0.0000, 0.0000
+Total Hexadecapole moments (ZZZY, XXYY, XXZZ, YYZZ): -0.0000, -85.3673, -80.2536, -73.3896
+Total Hexadecapole moments (XXYZ, YYXZ, ZZXY): -0.0000, -0.0000, 0.0000

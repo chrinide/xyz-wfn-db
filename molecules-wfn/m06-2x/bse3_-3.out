@@ -1,0 +1,277 @@
+#INFO: **** input file is /home/jluis/src/git/db/molecules-wfn/m06-2x/run_sp.py ****
+#!/usr/bin/env python
+
+import numpy, sys, os
+from pyscf import lib, gto, scf, dft
+from pyscf.tools import molden
+from pyscf.data import radii
+
+def read_molecule(path):
+
+    charge = spin = 0
+    with open(path, 'r') as myfile:
+        output = myfile.read()
+        output = output.lstrip()
+        output = output.rstrip()
+        output = output.split('\n')
+
+    try:
+        int(output[0])
+    except ValueError:
+        try:
+            charge = int(output[0].split(' ')[0])
+            spin = int(output[0].split(' ')[1]) - 1
+        except ValueError:
+            molecule = output
+        else:
+            molecule = '\n'.join(output[1:])
+    else:
+        if int(output[0]) == len(output) - 2:
+            molecule = '\n'.join(output[2:])
+            try:
+                charge = int(output[1].split(' ')[0])
+                spin = int(output[1].split(' ')[1])-1
+            except ValueError:
+                pass
+        else:
+            print "THIS IS NOT A VALID XYZ FILE"
+
+    return (molecule, charge, spin)
+
+directory = '../../molecules/'
+files = [i for i in os.listdir(directory) if i.endswith('.xyz')]
+
+for filename in files:
+
+    name = filename[:-8]
+    mol = gto.Mole()
+    (mol.atom, charge, spin) = read_molecule(directory+filename)
+    mol.basis = 'aug-cc-pvtz'
+    mol.charge = charge
+    mol.spin = spin
+    mol.output = name+'.out'
+    mol.symmetry = 0
+    mol.max_memory = 10000
+    mol.verbose = 4
+    mol.build()
+
+    mf = dft.RKS(mol) 
+    mf.grids.level = 4
+    mf.xc = 'm06-2x'
+    mf = scf.addons.remove_linear_dep_(mf)
+    mf.max_cycle = 120
+    mf.chkfile = name+'.chk'
+    mf.kernel()
+
+    dm = mf.make_rdm1()
+    nao = mol.nao_nr()
+    unit = 2.541746
+    origin = ([0.0,0.0,0.0])
+    charges = mol.atom_charges()
+    coords  = mol.atom_coords()
+    mol.set_common_orig(origin)
+    r2 = mol.intor_symmetric('int1e_r2')
+    r2 = numpy.einsum('ij,ji->', r2, dm)
+    lib.logger.info(mf,'Electronic spatial extent <R**2> (au): %.4f', r2)
+
+    lib.logger.info(mf,'* Multipoles in the independent field-basis, Gauge -> (0,0,0)')
+    ao_dip = mol.intor_symmetric('int1e_r', comp=3)
+    el_dip = numpy.einsum('xij,ji->x', ao_dip, dm)
+    lib.logger.info(mf,'Electronic Dipole moment(X, Y, Z, Debye): %.4f, %.4f, %.4f', *el_dip*unit)
+    nucl_dip = numpy.einsum('i,ix->x', charges, coords)
+    lib.logger.info(mf,'Nuclear Dipole moment(X, Y, Z, Debye): %.4f, %.4f, %.4f', *nucl_dip*unit)
+    mol_dip = (nucl_dip - el_dip) * unit
+    lib.logger.info(mf,'Total Dipole moment(X, Y, Z, Debye): %.4f, %.4f, %.4f', *mol_dip)
+
+    lib.logger.info(mf,'Quadrupole moments (Debye-Angs)')
+    rr = mol.intor_symmetric('int1e_rr', comp=9).reshape(3,3,nao,nao)
+    rr = -1.0*numpy.einsum('xyij,ji->xy', rr, dm)
+    rr += numpy.einsum('z,zx,zy->xy', charges, coords, coords)
+    rr = rr*unit*lib.param.BOHR
+    lib.logger.info(mf,'Total Quadrupole moments (XX, YY, ZZ): %.4f, %.4f, %.4f', \
+    rr[0,0], rr[1,1], rr[2,2])
+    lib.logger.info(mf,'Total Quadrupole moments (XY, XZ, YZ): %.4f, %.4f, %.4f', \
+    rr[0,1], rr[0,2], rr[1,2])
+ 
+    lib.logger.info(mf,'Octupole moments (Debye-Angs**2)')
+    rrr = mol.intor_symmetric('int1e_rrr', comp=27).reshape(3,3,3,nao,nao)
+    rrr = -1.0*numpy.einsum('xyzij,ji->xyz', rrr, dm)
+    rrr += numpy.einsum('z,zx,zy,zk->xyk', charges, coords, coords, coords)
+    rrr = rrr*unit*lib.param.BOHR**2
+    lib.logger.info(mf,'Total Octupole moments (XXX, YYY, ZZZ, XYY): %.4f, %.4f, %.4f, %.4f', \
+    rrr[0,0,0], rrr[1,1,1], rrr[2,2,2], rrr[0,1,1])
+    lib.logger.info(mf,'Total Octupole moments (XXY, XXZ, XZZ, YZZ): %.4f, %.4f, %.4f, %.4f', \
+    rrr[0,0,1], rrr[0,0,2], rrr[0,2,2], rrr[1,2,2])
+    lib.logger.info(mf,'Total Octupole moments (YYZ, XYZ): %.4f, %.4f', rrr[1,1,2], rrr[0,1,2])
+
+    lib.logger.info(mf,'Hexadecapole moments (Debye-Angs**3)')
+    rrrr = mol.intor_symmetric('int1e_rrrr', comp=81).reshape(3,3,3,3,nao,nao)
+    rrrr = -1.0*numpy.einsum('xyzwij,ji->xyzw', rrrr, dm)
+    rrrr += numpy.einsum('z,zx,zy,zk,zw->xykw', charges, coords, coords, coords, coords)
+    rrrr = rrrr*unit*lib.param.BOHR**3
+    lib.logger.info(mf,'Total Hexadecapole moments (XXXX, YYYY, ZZZZ, XXXY): %.4f, %.4f, %.4f, %.4f', \
+    rrrr[0,0,0,0], rrrr[1,1,1,1], rrrr[2,2,2,2], rrrr[0,0,0,1])
+    lib.logger.info(mf,'Total Hexadecapole moments (XXXZ, YYYX, YYYZ, ZZZX): %.4f, %.4f, %.4f, %.4f', \
+    rrrr[0,0,0,2], rrrr[1,1,1,0], rrrr[1,1,1,2], rrrr[2,2,2,0])
+    lib.logger.info(mf,'Total Hexadecapole moments (ZZZY, XXYY, XXZZ, YYZZ): %.4f, %.4f, %.4f, %.4f', \
+    rrrr[2,2,2,1], rrrr[0,0,1,1], rrrr[0,0,2,2], rrrr[1,1,2,2])
+    lib.logger.info(mf,'Total Hexadecapole moments (XXYZ, YYXZ, ZZXY): %.4f, %.4f, %.4f', \
+    rrrr[0,0,1,2], rrrr[1,1,0,2], rrrr[2,2,0,1])
+     
+    coeff = mf.mo_coeff[:,mf.mo_occ>0]
+    occ = mf.mo_occ[mf.mo_occ>0]
+    energy = mf.mo_energy[mf.mo_occ>0]
+    den_file = name+'.mol'
+    fspt = open(den_file,'w')
+    molden.header(mol, fspt)
+    molden.orbital_coeff(mol, fspt, coeff, ene=energy, occ=occ) 
+    fspt.close()                    
+    cmd = '/home/jluis/bin/molden2aim '+name
+    os.system(cmd)
+    den_file = name+'.wfn'
+    fspt = open(den_file,'a')
+    fspt.write('RHF\n')
+    fspt.close()                    
+
+    pmd_file = name+'.pmd'
+    fspt = open(pmd_file,'w')
+    fspt.write('%s.wfn\n' % (name))
+    if (mol.symmetry == False):
+        fspt.write('nosymmetry\n')
+    fspt.write('tes\n')
+    fspt.write('  epsiscp 0.220\n')
+    fspt.write('  radialquad 7\n')
+    fspt.write('  rmapping 2\n')
+    fspt.write('  lmax 10\n')
+    fspt.write('  nr 551\n')
+    fspt.write('  lebedev 5810\n')
+    fspt.write('  betasphere\n')
+    for ia in range(mol.natm):
+        symb = mol.atom_pure_symbol(ia)
+        inuc = lib.parameters.NUC[symb]
+        betarad = radii.COVALENT[inuc]/3.5
+        fspt.write('  betaradw %d %1.3f\n' % ((ia+1),betarad))
+    fspt.write('  radialquadbeta 7\n')
+    fspt.write('  rmappingbeta 3\n')
+    fspt.write('  lmaxbeta 8\n')
+    fspt.write('  nrb 451\n')
+    fspt.write('  lebedevbeta 3074\n')
+    fspt.write('  dafh\n')
+    fspt.write('endtes')
+    fspt.close()                    
+
+    cmd = 'rm '+name+'.mol'
+    os.system(cmd)
+#INFO: ******************** input file end ********************
+
+
+System: ('Linux', 'silicio', '3.16.0-4-amd64', '#1 SMP Debian 3.16.51-3 (2017-12-13)', 'x86_64', '')  Threads 12
+Python 2.7.14 (default, Apr  9 2018, 16:34:43) 
+[GCC 7.3.0]
+numpy 1.14.2  scipy 1.0.1
+Date: Thu Jun 28 06:44:31 2018
+PySCF version 1.5
+PySCF path  /home/jluis/src/pyscf/pyscf
+GIT ORIG_HEAD f2dbb26d09ae5148fbf5975669a994500ac7a4c9
+GIT HEAD      ref: refs/heads/master
+GIT master branch  f2dbb26d09ae5148fbf5975669a994500ac7a4c9
+
+[ENV] PYSCF_TMPDIR /scratch-ssd/jluis
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 4
+[INPUT] num. electrons = 110
+[INPUT] charge = -3
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry 0 subgroup None
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 B     -0.000462000000   0.000000000000   0.000000000000 AA   -0.000873053470   0.000000000000   0.000000000000 Bohr
+[INPUT]  2 Se    -1.006804000000   1.744845000000   0.000000000000 AA   -1.902583821117   3.297279179817   0.000000000000 Bohr
+[INPUT]  3 Se    -1.006804000000  -1.744845000000   0.000000000000 AA   -1.902583821117  -3.297279179817   0.000000000000 Bohr
+[INPUT]  4 Se     2.014070000000   0.000000000000   0.000000000000 AA    3.806040695703   0.000000000000   0.000000000000 Bohr
+
+nuclear repulsion = 659.979303059088
+number of shells = 55
+number of NR pGTOs = 439
+number of NR cGTOs = 223
+basis = aug-cc-pvtz
+ecp = {}
+CPU time:    196654.85
+
+
+******** <class 'pyscf.dft.rks.RKS'> flags ********
+method = RKS-RHF
+initial guess = minao
+damping factor = 0
+level shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+DIIS start cycle = 1
+DIIS space = 8
+SCF tol = 1e-09
+SCF gradient tol = None
+max. SCF cycles = 120
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = bse3_-3.chk
+max_memory 10000 MB (current use 228 MB)
+XC functionals = m06-2x
+small_rho_cutoff = 1e-07
+radial grids: 
+    Treutler-Ahlrichs (JCP 102, 346 (M4)) radial grids
+    
+becke partition: Becke, JCP, 88, 2547 (1988)
+pruning grids: <function nwchem_prune at 0x2b19c47015f0>
+grids dens level: 4
+symmetrized grids: 0
+atomic radii adjust function: <function treutler_atomic_radii_adjust at 0x2b19c4701500>
+Set gradient conv threshold to 3.16228e-05
+tot grids = 119862
+init E= -7227.20755775553
+  HOMO = -0.245602281468141  LUMO = -0.053142152881536
+cycle= 1 E= -7229.4080738591  delta_E= -2.2  |g|= 0.48  |ddm|=  3.2
+  HOMO = 0.312388059515392  LUMO = 0.322816544697639
+cycle= 2 E= -7227.43326374412  delta_E= 1.97  |g|=  1.7  |ddm|=  670
+  HOMO = 0.211958990146796  LUMO = 0.272581746346559
+cycle= 3 E= -7229.55813281007  delta_E= -2.12  |g|= 0.215  |ddm|=  670
+  HOMO = 0.202535775429507  LUMO = 0.280460079358197
+cycle= 4 E= -7229.57185733373  delta_E= -0.0137  |g|= 0.132  |ddm|= 0.499
+  HOMO = 0.220860797925709  LUMO = 0.29375493714281
+cycle= 5 E= -7229.58150027881  delta_E= -0.00964  |g|= 0.0346  |ddm|= 1.42
+  HOMO = 0.222094023111038  LUMO = 0.297901201778269
+cycle= 6 E= -7229.58219899572  delta_E= -0.000699  |g|= 0.00928  |ddm|= 0.431
+  HOMO = 0.220705119235125  LUMO = 0.297866606077916
+cycle= 7 E= -7229.58232627735  delta_E= -0.000127  |g|= 0.00384  |ddm|= 0.327
+  HOMO = 0.219998047965042  LUMO = 0.297604801263421
+cycle= 8 E= -7229.58234742034  delta_E= -2.11e-05  |g|= 0.00259  |ddm|= 0.147
+  HOMO = 0.219012054722303  LUMO = 0.2972723045211
+cycle= 9 E= -7229.58235569004  delta_E= -8.27e-06  |g|= 0.00095  |ddm|= 0.124
+  HOMO = 0.218718373382872  LUMO = 0.297190621020852
+cycle= 10 E= -7229.58235659999  delta_E= -9.1e-07  |g|= 0.000327  |ddm|= 0.0423
+  HOMO = 0.218652255482091  LUMO = 0.297168507039478
+cycle= 11 E= -7229.5823567004  delta_E= -1e-07  |g|= 9.46e-05  |ddm|= 0.0116
+  HOMO = 0.218668109273165  LUMO = 0.297171536380005
+cycle= 12 E= -7229.58235671231  delta_E= -1.19e-08  |g|= 2.57e-05  |ddm|= 0.00289
+  HOMO = 0.218674894985664  LUMO = 0.29716995925631
+cycle= 13 E= -7229.58235671344  delta_E= -1.13e-09  |g|= 8.4e-06  |ddm|= 0.00116
+  HOMO = 0.218674880883242  LUMO = 0.297170393216304
+cycle= 14 E= -7229.58235671367  delta_E= -2.36e-10  |g|= 3.41e-06  |ddm|= 0.000869
+  HOMO = 0.218674550260086  LUMO = 0.297170390109357
+Extra cycle  E= -7229.58235671368  delta_E= -1e-11  |g|= 3.82e-06  |ddm|= 0.000239
+converged SCF energy = -7229.58235671368
+Electronic spatial extent <R**2> (au): 1748.0171
+* Multipoles in the independent field-basis, Gauge -> (0,0,0)
+Electronic Dipole moment(X, Y, Z, Debye): 0.0640, -0.0000, 0.0000
+Nuclear Dipole moment(X, Y, Z, Debye): 0.0644, 0.0000, 0.0000
+Total Dipole moment(X, Y, Z, Debye): 0.0004, 0.0000, -0.0000
+Quadrupole moments (Debye-Angs)
+Total Quadrupole moments (XX, YY, ZZ): -135.6933, -135.6439, -91.8858
+Total Quadrupole moments (XY, XZ, YZ): -0.0000, 0.0000, 0.0000
+Octupole moments (Debye-Angs**2)
+Total Octupole moments (XXX, YYY, ZZZ, XYY): -28.0609, -0.0000, -0.0000, 28.1065
+Total Octupole moments (XXY, XXZ, XZZ, YZZ): -0.0000, -0.0000, -0.0056, 0.0000
+Total Octupole moments (YYZ, XYZ): -0.0000, 0.0000
+Hexadecapole moments (Debye-Angs**3)
+Total Hexadecapole moments (XXXX, YYYY, ZZZZ, XXXY): -1626.6531, -1625.4868, -290.3674, -0.0000
+Total Hexadecapole moments (XXXZ, YYYX, YYYZ, ZZZX): -0.0000, -0.0000, 0.0000, -0.0000
+Total Hexadecapole moments (ZZZY, XXYY, XXZZ, YYZZ): 0.0000, -542.2652, -306.3617, -306.2433
+Total Hexadecapole moments (XXYZ, YYXZ, ZZXY): 0.0000, 0.0000, -0.0000
