@@ -57,9 +57,9 @@ for filename in files:
     mf = dft.RKS(mol) 
     mf.grids.level = 4
     mf.xc = 'pbe0'
-    mf = scf.addons.remove_linear_dep_(mf)
     mf.max_cycle = 120
     mf.chkfile = name+'.chk'
+    mf = scf.addons.remove_linear_dep_(mf)
     mf.kernel()
 
     dm = mf.make_rdm1()
