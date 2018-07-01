@@ -50,10 +50,13 @@ for filename in files:
     mol.spin = spin
     mol.output = name+'.out'
     mol.symmetry = 0
+    mol.max_memory = 10000
     mol.verbose = 4
     mol.build()
 
-    mf = scf.RHF(mol) 
+    mf = dft.RKS(mol) 
+    mf.grids.level = 4
+    mf.xc = 'm06_2x'
     mf.max_cycle = 120
     mf.chkfile = name+'.chk'
     mf = scf.addons.remove_linear_dep_(mf)

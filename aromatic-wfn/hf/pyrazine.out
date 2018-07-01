@@ -1,3 +1,4 @@
+#INFO: **** input file is /home/jluis/src/git/db/aromatic-wfn/hf/run_sp.py ****
 #!/usr/bin/env python
 
 import numpy, sys, os
@@ -159,3 +160,104 @@ for filename in files:
     cmd = 'rm '+name+'.mol'
     os.system(cmd)
 
+#INFO: ******************** input file end ********************
+
+
+System: ('Linux', 'cromo', '4.9.0-0.bpo.3-amd64', '#1 SMP Debian 4.9.30-2+deb9u5~bpo8+1 (2017-09-28)', 'x86_64', '')  Threads 4
+Python 2.7.14 (default, Apr 10 2018, 19:21:27) 
+[GCC 7.3.0]
+numpy 1.14.2  scipy 1.0.1
+Date: Sun Jul  1 16:36:39 2018
+PySCF version 1.5
+PySCF path  /home/jluis/src/pyscf/pyscf
+GIT ORIG_HEAD 1ca9fa9a79cffe36c02a6597649cc8e4258362c9
+GIT HEAD      ref: refs/heads/master
+GIT master branch  2a04e98fd7e076282a2b183302d17fc6af3d78e6
+
+[ENV] PYSCF_MAX_MEMORY 32000
+[ENV] PYSCF_TMPDIR /scratch-ssd/jluis
+[CONFIG] conf_file None
+[INPUT] verbose = 4
+[INPUT] num. atoms = 10
+[INPUT] num. electrons = 42
+[INPUT] charge = 0
+[INPUT] spin (= nelec alpha-beta = 2S) = 0
+[INPUT] symmetry 0 subgroup None
+[INPUT] Mole.unit = angstrom
+[INPUT]  1 H      0.000000000000   2.068531000000   1.256237000000 AA    0.000000000000   3.908957070173   2.373943877545 Bohr
+[INPUT]  2 H      0.000000000000  -2.068531000000   1.256237000000 AA    0.000000000000  -3.908957070173   2.373943877545 Bohr
+[INPUT]  3 H      0.000000000000   2.068531000000  -1.256237000000 AA    0.000000000000   3.908957070173  -2.373943877545 Bohr
+[INPUT]  4 H      0.000000000000  -2.068531000000  -1.256237000000 AA    0.000000000000  -3.908957070173  -2.373943877545 Bohr
+[INPUT]  5 C      0.000000000000   1.129484000000   0.697929000000 AA    0.000000000000   2.134415422078   1.318894664392 Bohr
+[INPUT]  6 C      0.000000000000  -1.129484000000   0.697929000000 AA    0.000000000000  -2.134415422078   1.318894664392 Bohr
+[INPUT]  7 C      0.000000000000   1.129484000000  -0.697929000000 AA    0.000000000000   2.134415422078  -1.318894664392 Bohr
+[INPUT]  8 C      0.000000000000  -1.129484000000  -0.697929000000 AA    0.000000000000  -2.134415422078  -1.318894664392 Bohr
+[INPUT]  9 N      0.000000000000   0.000000000000   1.406436000000 AA    0.000000000000   0.000000000000   2.657778851729 Bohr
+[INPUT] 10 N      0.000000000000   0.000000000000  -1.406436000000 AA    0.000000000000   0.000000000000  -2.657778851729 Bohr
+
+nuclear repulsion = 208.847651824481
+number of shells = 114
+number of NR pGTOs = 448
+number of NR cGTOs = 368
+basis = aug-cc-pvtz
+ecp = {}
+CPU time:         0.21
+
+
+******** <class 'pyscf.scf.hf.RHF'> flags ********
+method = RHF
+initial guess = minao
+damping factor = 0
+level shift factor = 0
+DIIS = <class 'pyscf.scf.diis.CDIIS'>
+DIIS start cycle = 1
+DIIS space = 8
+SCF tol = 1e-09
+SCF gradient tol = None
+max. SCF cycles = 120
+direct_scf = True
+direct_scf_tol = 1e-13
+chkfile to save SCF result = pyrazine.chk
+max_memory 32000 MB (current use 69 MB)
+Set gradient conv threshold to 3.16228e-05
+init E= -264.659181469363
+  HOMO = -0.246590925237867  LUMO = -0.0485617769665546
+cycle= 1 E= -262.708803885448  delta_E= 1.95  |g|= 0.42  |ddm|= 5.44
+  HOMO = -0.383091581784419  LUMO = 0.0273893598169117
+cycle= 2 E= -262.765323919447  delta_E= -0.0565  |g|= 0.12  |ddm|= 0.573
+  HOMO = -0.348642942780448  LUMO = 0.0287592402623647
+cycle= 3 E= -262.770013742742  delta_E= -0.00469  |g|= 0.0528  |ddm|= 0.209
+  HOMO = -0.359564089516608  LUMO = 0.0285084016412459
+cycle= 4 E= -262.770785489047  delta_E= -0.000772  |g|= 0.0128  |ddm|= 0.0494
+  HOMO = -0.359863322734932  LUMO = 0.0284913444711416
+cycle= 5 E= -262.770845948699  delta_E= -6.05e-05  |g|= 0.00458  |ddm|= 0.0264
+  HOMO = -0.359602022362429  LUMO = 0.0284833500528494
+cycle= 6 E= -262.770856250712  delta_E= -1.03e-05  |g|= 0.00161  |ddm|= 0.0105
+  HOMO = -0.359721634416703  LUMO = 0.028487382552978
+cycle= 7 E= -262.77085815884  delta_E= -1.91e-06  |g|= 0.00029  |ddm|= 0.00487
+  HOMO = -0.359779899500511  LUMO = 0.0284877906695791
+cycle= 8 E= -262.770858227154  delta_E= -6.83e-08  |g|= 6.07e-05  |ddm|= 0.000823
+  HOMO = -0.359778422094081  LUMO = 0.0284881153282181
+cycle= 9 E= -262.770858229529  delta_E= -2.38e-09  |g|= 1.58e-05  |ddm|= 0.000161
+  HOMO = -0.359781261067349  LUMO = 0.0284882447922089
+cycle= 10 E= -262.770858229709  delta_E= -1.8e-10  |g|= 2.09e-06  |ddm|= 6.6e-05
+  HOMO = -0.359781162903365  LUMO = 0.0284882525253152
+Extra cycle  E= -262.770858229712  delta_E= -3.41e-12  |g|= 9.54e-07  |ddm|= 7.46e-06
+converged SCF energy = -262.770858229712
+Electronic spatial extent <R**2> (au): 411.7663
+* Multipoles in the independent field-basis, Gauge -> (0,0,0)
+Electronic Dipole moment(X, Y, Z, Debye): 0.0000, -0.0000, -0.0000
+Nuclear Dipole moment(X, Y, Z, Debye): 0.0000, 0.0000, 0.0000
+Total Dipole moment(X, Y, Z, Debye): -0.0000, 0.0000, 0.0000
+Quadrupole moments (Debye-Angs)
+Total Quadrupole moments (XX, YY, ZZ): -36.9242, -26.5883, -41.5695
+Total Quadrupole moments (XY, XZ, YZ): 0.0000, 0.0000, 0.0000
+Octupole moments (Debye-Angs**2)
+Total Octupole moments (XXX, YYY, ZZZ, XYY): -0.0000, 0.0000, 0.0000, -0.0000
+Total Octupole moments (XXY, XXZ, XZZ, YZZ): 0.0000, -0.0000, -0.0000, 0.0000
+Total Octupole moments (YYZ, XYZ): -0.0000, 0.0000
+Hexadecapole moments (Debye-Angs**3)
+Total Hexadecapole moments (XXXX, YYYY, ZZZZ, XXXY): -40.9532, -229.4018, -303.5610, 0.0000
+Total Hexadecapole moments (XXXZ, YYYX, YYYZ, ZZZX): 0.0000, 0.0000, 0.0000, 0.0000
+Total Hexadecapole moments (ZZZY, XXYY, XXZZ, YYZZ): -0.0000, -55.4899, -52.7064, -69.1043
+Total Hexadecapole moments (XXYZ, YYXZ, ZZXY): -0.0000, 0.0000, 0.0000
