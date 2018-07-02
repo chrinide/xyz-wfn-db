@@ -37,7 +37,7 @@ def read_molecule(path):
 
     return (molecule, charge, spin)
 
-directory = '../../kb49/'
+directory = '../../../kb49/fragments/'
 files = [i for i in os.listdir(directory) if i.endswith('.xyz')]
 
 for filename in files:
