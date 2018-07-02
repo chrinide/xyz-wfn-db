@@ -38,7 +38,7 @@ def read_molecule(path):
 
     return (molecule, charge, spin)
 
-directory = '../../kb49/'
+directory = '../../s22/'
 files = [i for i in os.listdir(directory) if i.endswith('.xyz')]
 
 for filename in files:
@@ -54,8 +54,8 @@ for filename in files:
     mol.verbose = 4
     mol.build()
 
-    mf = dft.RKS(mol).density_fit() 
-    mf.with_df.auxbasis = 'aug-cc-pvtz-jkfit'
+    mf = dft.RKS(mol)#.density_fit() 
+    #mf.with_df.auxbasis = 'aug-cc-pvtz-jkfit'
     #mf.xc = 'rpw86,pbe'
     mf.xc = 'vv10'
     mf.grids.level = 4
@@ -175,7 +175,7 @@ System: ('Linux', 'silicio', '3.16.0-4-amd64', '#1 SMP Debian 3.16.51-3 (2017-12
 Python 2.7.14 (default, Apr  9 2018, 16:34:43) 
 [GCC 7.3.0]
 numpy 1.14.2  scipy 1.0.1
-Date: Mon Jul  2 14:16:16 2018
+Date: Mon Jul  2 17:59:36 2018
 PySCF version 1.5
 PySCF path  /home/jluis/src/pyscf/pyscf
 GIT ORIG_HEAD f2dbb26d09ae5148fbf5975669a994500ac7a4c9
@@ -224,11 +224,11 @@ number of NR pGTOs = 1112
 number of NR cGTOs = 920
 basis = aug-cc-pvtz
 ecp = {}
-CPU time:         0.42
+CPU time:         0.26
 
 
-******** <class 'pyscf.df.df_jk.DFHF'> flags ********
-method = DFHF-RKS-RHF
+******** <class 'pyscf.dft.rks.RKS'> flags ********
+method = RKS-RHF
 initial guess = minao
 damping factor = 0
 level shift factor = 0
@@ -238,9 +238,10 @@ DIIS space = 8
 SCF tol = 1e-09
 SCF gradient tol = None
 max. SCF cycles = 120
-direct_scf = False
+direct_scf = True
+direct_scf_tol = 1e-13
 chkfile to save SCF result = phenol_phenol.chk
-max_memory 64000 MB (current use 64 MB)
+max_memory 64000 MB (current use 63 MB)
 XC functionals = vv10
 NLC functional = vv10
 small_rho_cutoff = 1e-07
@@ -248,70 +249,29 @@ radial grids:
     Treutler-Ahlrichs (JCP 102, 346 (M4)) radial grids
     
 becke partition: Becke, JCP, 88, 2547 (1988)
-pruning grids: <function nwchem_prune at 0x2b730447c5f0>
+pruning grids: <function nwchem_prune at 0x2b76d4a885f0>
 grids dens level: 4
 symmetrized grids: 0
-atomic radii adjust function: <function treutler_atomic_radii_adjust at 0x2b730447c500>
+atomic radii adjust function: <function treutler_atomic_radii_adjust at 0x2b76d4a88500>
 ** Following is NLC Grids **
 radial grids: 
     Treutler-Ahlrichs (JCP 102, 346 (M4)) radial grids
     
 becke partition: Becke, JCP, 88, 2547 (1988)
-pruning grids: <function sg1_prune at 0x2b730447c578>
+pruning grids: <function sg1_prune at 0x2b76d4a88578>
 grids dens level: 2
 symmetrized grids: 0
-atomic radii adjust function: <function treutler_atomic_radii_adjust at 0x2b730447c500>
+atomic radii adjust function: <function treutler_atomic_radii_adjust at 0x2b76d4a88500>
 Set gradient conv threshold to 3.16228e-05
 tot grids = 587976
 tot grids = 113504
-******** <class 'pyscf.df.df.DF'> flags ********
-auxbasis = aug-cc-pvtz-jkfit
-max_memory = 64000
-_cderi_to_save = /scratch-ssd/jluis/tmpjGCgSl
-init E= -618.223630869977
-  HOMO = -0.32928537506214  LUMO = -0.172203540619794
-cycle= 1 E= -615.589791412057  delta_E= 2.63  |g|= 1.53  |ddm|= 14.7
-  HOMO = -0.0459279284361613  LUMO = -0.0265958947908266
-cycle= 2 E= -614.70845106348  delta_E= 0.881  |g|=  2.4  |ddm|= 11.7
-  HOMO = -0.196720995265675  LUMO = -0.0588396913480672
-cycle= 3 E= -616.120215585249  delta_E= -1.41  |g|= 0.217  |ddm|=  9.7
-  HOMO = -0.195652841074248  LUMO = -0.0617573900376578
-cycle= 4 E= -616.117767353716  delta_E= 0.00245  |g|= 0.225  |ddm|= 0.65
-  HOMO = -0.192184944810731  LUMO = -0.059148783662374
-cycle= 5 E= -616.132059393145  delta_E= -0.0143  |g|= 0.0319  |ddm|= 0.317
-  HOMO = -0.193540172845205  LUMO = -0.0586266598753536
-cycle= 6 E= -616.132206150657  delta_E= -0.000147  |g|= 0.0215  |ddm|= 0.099
-  HOMO = -0.192881938589116  LUMO = -0.0587823700450168
-cycle= 7 E= -616.132313169818  delta_E= -0.000107  |g|= 0.00461  |ddm|= 0.0335
-  HOMO = -0.193015952771502  LUMO = -0.0589059356091788
-cycle= 8 E= -616.132316359321  delta_E= -3.19e-06  |g|= 0.00249  |ddm|= 0.00985
-  HOMO = -0.193070013609778  LUMO = -0.0589338717354287
-cycle= 9 E= -616.132317962123  delta_E= -1.6e-06  |g|= 0.000609  |ddm|= 0.0036
-  HOMO = -0.193103318337293  LUMO = -0.0589477375321992
-cycle= 10 E= -616.132318040745  delta_E= -7.86e-08  |g|= 0.000265  |ddm|= 0.00133
-  HOMO = -0.193105675815894  LUMO = -0.0589512114247675
-cycle= 11 E= -616.13231805362  delta_E= -1.29e-08  |g|= 0.000103  |ddm|= 0.000537
-  HOMO = -0.193099702895417  LUMO = -0.058948846284117
-cycle= 12 E= -616.132318055745  delta_E= -2.13e-09  |g|= 2.31e-05  |ddm|= 0.000204
-  HOMO = -0.193099574129694  LUMO = -0.0589477639656983
-cycle= 13 E= -616.132318055824  delta_E= -7.91e-11  |g|= 1.51e-05  |ddm|= 4.99e-05
-  HOMO = -0.19309986800106  LUMO = -0.058948006044463
-Extra cycle  E= -616.132318055449  delta_E= 3.75e-10  |g|= 4e-05  |ddm|= 6.93e-05
-converged SCF energy = -616.132318055449
-Electronic spatial extent <R**2> (au): 3511.4144
-* Multipoles in the independent field-basis, Gauge -> (0,0,0)
-Electronic Dipole moment(X, Y, Z, Debye): -0.1437, -8.7715, 0.9716
-Nuclear Dipole moment(X, Y, Z, Debye): 2.7778, -9.0129, 2.4472
-Total Dipole moment(X, Y, Z, Debye): 2.9214, -0.2414, 1.4756
-Quadrupole moments (Debye-Angs)
-Total Quadrupole moments (XX, YY, ZZ): -79.2437, -80.9158, -80.2582
-Total Quadrupole moments (XY, XZ, YZ): 3.6037, 6.7071, 4.9188
-Octupole moments (Debye-Angs**2)
-Total Octupole moments (XXX, YYY, ZZZ, XYY): 9.1024, 18.6809, 0.3975, 17.1498
-Total Octupole moments (XXY, XXZ, XZZ, YZZ): -7.0232, 5.2828, 10.8075, 10.1268
-Total Octupole moments (YYZ, XYZ): 12.2613, 14.5407
-Hexadecapole moments (Debye-Angs**3)
-Total Hexadecapole moments (XXXX, YYYY, ZZZZ, XXXY): -3574.3133, -801.5593, -414.4867, -10.6243
-Total Hexadecapole moments (XXXZ, YYYX, YYYZ, ZZZX): 145.9950, 31.5272, 31.0655, 19.5646
-Total Hexadecapole moments (ZZZY, XXYY, XXZZ, YYZZ): 14.8601, -698.2642, -676.7388, -183.1993
-Total Hexadecapole moments (XXYZ, YYXZ, ZZXY): 12.8094, -0.8093, 5.4027
+init E= -618.223593403954
+  HOMO = -0.329285443021682  LUMO = -0.172204170544153
+cycle= 1 E= -615.589639738541  delta_E= 2.63  |g|= 1.53  |ddm|= 14.8
+  HOMO = -0.0459303382059646  LUMO = -0.0265964618878373
+cycle= 2 E= -614.708226443277  delta_E= 0.881  |g|=  2.4  |ddm|= 11.7
+  HOMO = -0.19673038028254  LUMO = -0.0588464164023891
+cycle= 3 E= -616.120104372513  delta_E= -1.41  |g|= 0.217  |ddm|=  9.7
+  HOMO = -0.19565895154885  LUMO = -0.0617604760468337
+cycle= 4 E= -616.117655825187  delta_E= 0.00245  |g|= 0.225  |ddm|= 0.649
+  HOMO = -0.192189446213661  LUMO = -0.0591509893666093
