@@ -1,0 +1,23 @@
+c2h2f2-t.wfn
+nosymmetry
+tes
+  epsiscp 0.220
+  radialquad 7
+  rmapping 2
+  lmax 10
+  nr 551
+  lebedev 5810
+  betasphere
+  betaradw 1 0.394
+  betaradw 2 0.394
+  betaradw 3 0.167
+  betaradw 4 0.308
+  betaradw 5 0.308
+  betaradw 6 0.167
+  radialquadbeta 7
+  rmappingbeta 3
+  lmaxbeta 8
+  nrb 451
+  lebedevbeta 3074
+  dafh
+endtes
